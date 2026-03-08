@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  edge-api:
+    build:
+      context: ./services/edge-api
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - AI_ORCHESTRATOR_URL=http://ai-orchestrator:8081
+    depends_on:
+      - ai-orchestrator
+
+  ai-orchestrator:
+    build:
+      context: ./services/ai-orchestrator
+    ports:
+      - "8081:8081"
+    environment:
+      - PORT=8081

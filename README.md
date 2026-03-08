@@ -1,27 +1,32 @@
-# AIBudget Plan
+# AIBudget
 
-## Goal
-Set up this local project as a Git repository and push it to GitHub.
+AI-powered spending tracker with local-first mobile UX and cloud-assisted AI categorization/chat.
 
-## Plan
-1. Create initial project files (starting with this `README.md`).
-2. Initialize Git in `/home/sunso/projects/AIBudget`.
-3. Stage files and create the first commit.
-4. Create a GitHub repository (or use an existing one).
-5. Add the GitHub repository as `origin`.
-6. Push the default branch to GitHub.
+## Monorepo Layout
+- `mobile/`: Flutter app module scaffold
+- `services/edge-api`: Go edge API service
+- `services/ai-orchestrator`: Go AI orchestration service
+- `contracts/openapi/ai-v1.yaml`: API contract source
+- `docs/`: product + architecture docs
 
-## Commands We Will Run
+## Milestone 1 Status
+- Monorepo scaffold created
+- OpenAPI contract for AI endpoints created
+- CI workflow for docs lint, OpenAPI validation, and Go tests added
+- Local docker-compose runtime added for backend services
+
+## Local Run
+### Services (without Docker)
 ```bash
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin <YOUR_GITHUB_REPO_URL>
-git push -u origin main
+(cd services/ai-orchestrator && go run ./cmd/server)
+(cd services/edge-api && go run ./cmd/server)
 ```
 
-## What I Need From You
-- Your GitHub repo URL, for example:
-  - `https://github.com/<your-username>/AIBudget.git`
-  - or `git@github.com:<your-username>/AIBudget.git`
+### Services (Docker)
+```bash
+docker compose up --build
+```
+
+Health checks:
+- `http://localhost:8080/health`
+- `http://localhost:8081/health`

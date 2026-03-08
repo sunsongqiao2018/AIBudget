@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  docs-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint markdown docs
+        run: |
+          set -e
+          for f in docs/*.md; do
+            if [ ! -f "$f" ]; then
+              echo "No docs files found"
+              exit 1
+            fi
+            if ! grep -qE '^# ' "$f"; then
+              echo "Missing top-level heading in $f"
+              exit 1
+            fi
+          done
+
+  edge-api-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/edge-api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Test
+        run: go test ./...
+
+  ai-orchestrator-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/ai-orchestrator
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Test
+        run: go test ./...
+
+  openapi-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install swagger-cli
+        run: npm install -g @apidevtools/swagger-cli
+      - name: Validate OpenAPI
+        run: swagger-cli validate contracts/openapi/ai-v1.yaml

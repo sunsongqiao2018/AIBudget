@@ -1,0 +1,153 @@
+openapi: 3.0.3
+info:
+  title: AIBudget AI API
+  version: 1.0.0
+  description: API contract for categorization and chat query endpoints.
+servers:
+  - url: http://localhost:8080
+paths:
+  /v1/ai/categorize:
+    post:
+      summary: Categorize normalized transaction candidates.
+      operationId: categorizeTransactions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategorizeRequest'
+      responses:
+        '200':
+          description: Categorization results.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategorizeResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/ai/chat/query:
+    post:
+      summary: Answer spending questions using summarized ledger context.
+      operationId: queryChat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatQueryRequest'
+      responses:
+        '200':
+          description: Query answer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatQueryResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    TransactionCandidate:
+      type: object
+      required: [date, amount, currency, merchant]
+      properties:
+        date:
+          type: string
+          format: date
+        amount:
+          type: number
+          format: float
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+        merchant:
+          type: string
+        note:
+          type: string
+    CategorizeRequest:
+      type: object
+      required: [transactions]
+      properties:
+        transactions:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/TransactionCandidate'
+    CategorizedTransaction:
+      allOf:
+        - $ref: '#/components/schemas/TransactionCandidate'
+        - type: object
+          required: [category, confidence]
+          properties:
+            category:
+              type: string
+            confidence:
+              type: number
+              minimum: 0
+              maximum: 1
+            rationale:
+              type: string
+    CategorizeResponse:
+      type: object
+      required: [results]
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategorizedTransaction'
+    LedgerSummary:
+      type: object
+      required: [rangeStart, rangeEnd, totalsByCategory]
+      properties:
+        rangeStart:
+          type: string
+          format: date
+        rangeEnd:
+          type: string
+          format: date
+        totalsByCategory:
+          type: object
+          additionalProperties:
+            type: number
+            format: float
+    ChatQueryRequest:
+      type: object
+      required: [question, ledgerSummary]
+      properties:
+        question:
+          type: string
+          minLength: 3
+        ledgerSummary:
+          $ref: '#/components/schemas/LedgerSummary'
+    MetricCitation:
+      type: object
+      required: [label, value]
+      properties:
+        label:
+          type: string
+        value:
+          type: string
+    ChatQueryResponse:
+      type: object
+      required: [answer, citations]
+      properties:
+        answer:
+          type: string
+        citations:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetricCitation'
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
