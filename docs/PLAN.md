@@ -81,3 +81,7 @@ MVP focuses on ingesting spending data from PDFs/images, extracting transactions
 2. `git add .`
 3. `git commit -m "chore: initial scaffold and project plan"`
 4. `gh repo create AIBudget --private --source . --remote origin --push`
+
+## See Also
+- Frontend technical architecture: `docs/TECH_ARCH_FE.md`
+- Backend technical architecture: `docs/TECH_ARCH_BE.md`
