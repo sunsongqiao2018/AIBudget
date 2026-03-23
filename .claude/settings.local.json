@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go get:*)",
+      "Bash(flutter run:*)",
+      "Bash(curl -s http://localhost:8080/health)",
+      "Bash(curl -s http://localhost:8081/health)",
+      "Bash(flutter create:*)",
+      "Bash(flutter build:*)",
+      "Bash(python -m http.server 8090)",
+      "Bash(curl -s -I -X OPTIONS http://localhost:8080/v1/ai/chat/query -H \"Origin: http://localhost:8090\" -H \"Access-Control-Request-Method: POST\")",
+      "Bash(netstat -ano)",
+      "Read(//c/Users/sunso/Documents/AIBudget/**)",
+      "Bash(xargs -I{} taskkill /PID {} /F)",
+      "Bash(taskkill /PID 23080 /F)",
+      "Bash(go run:*)",
+      "Bash(cmd //c \"taskkill /PID 23080 /F\")"
+    ]
+  }
+}
