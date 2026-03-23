@@ -1,16 +1,15 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"os"
-)
 
-type healthResponse struct {
-	Status  string `json:"status"`
-	Service string `json:"service"`
-}
+	"github.com/sunsongqiao2018/AIBudget/services/ai-orchestrator/internal/adapter/llm"
+	"github.com/sunsongqiao2018/AIBudget/services/ai-orchestrator/internal/app/categorize"
+	"github.com/sunsongqiao2018/AIBudget/services/ai-orchestrator/internal/app/chat"
+	httphandler "github.com/sunsongqiao2018/AIBudget/services/ai-orchestrator/internal/transport/http"
+)
 
 func main() {
 	port := os.Getenv("PORT")
@@ -18,23 +17,24 @@ func main() {
 		port = "8081"
 	}
 
+	// Create LLM provider (using mock for MVP)
+	// In production, this would be configurable (OpenAI, Anthropic, etc.)
+	llmProvider := llm.NewMockProvider()
+
+	// Create application services
+	categorizeService := categorize.NewService(llmProvider)
+	chatService := chat.NewService(llmProvider)
+
+	// Create HTTP handler with dependencies
+	handler := httphandler.NewHandler(categorizeService, chatService)
+
+	// Register routes
 	mux := http.NewServeMux()
-	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(healthResponse{Status: "ok", Service: "ai-orchestrator"})
-	})
-
-	mux.HandleFunc("/internal/categorize", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"results":[]}`))
-	})
-
-	mux.HandleFunc("/internal/chat/query", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"answer":"stub","citations":[]}`))
-	})
+	handler.RegisterRoutes(mux)
 
 	log.Printf("ai-orchestrator listening on :%s", port)
+	log.Printf("Using mock LLM provider (ready to process requests)")
+
 	if err := http.ListenAndServe(":"+port, mux); err != nil {
 		log.Fatal(err)
 	}
